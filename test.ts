@@ -1,15 +1,49 @@
-const todoistApi = require("@doist/todoist-api-typescript");
+const { TodoistApi } = require("@doist/todoist-api-typescript");
 const dotenv = require("dotenv");
+const { Client } = require("@notionhq/client")
 
 dotenv.config();
 
-const api = new todoistApi.TodoistApi(process.env.TODOIST_TOKEN)
 
-api.getLabels()
-    .then((labels) => {
-        labels.forEach(label => {
-            console.log(label.name);
-        });
-    })
-    .catch((error) => console.log(error))
+//#region Todoist
+const api = new TodoistApi(process.env.TODOIST_TOKEN);
 
+const getCustomTasks = (filter) => {
+  return new Promise((resolve, reject) => {
+    api
+      .getTasks({
+        filter: filter
+      })
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+//#endregion
+
+//#region Notion
+const notion = new Client({
+    auth: process.env.NOTION_TOKEN,
+})
+
+const getUsers = async () => {
+    const listUsersResponse = await notion.users.list({})
+    console.log(listUsersResponse);
+}
+//#endregion
+
+async function main() {
+    try {
+        const customTaskResult = await getCustomTasks("@Diario");
+        //console.log(customTaskResult); 
+
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+main();
