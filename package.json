@@ -10,12 +10,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": ""
   },
-  "author": "Aman Gupta",
-  "license": "MIT",
+  "author": "AtomosEnAlmibar",
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
-    "@types/node": "^20.3.1",
+    "@notionhq/client": "^2.2.5",
     "@types/dotenv": "^8.2.0",
-    "dotenv": "^16.2.0"
+    "@types/node": "^20.3.1",
+    "dotenv": "^16.2.0",
+    "typescript": "^5.1.3"
   }
 }
