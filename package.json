@@ -1,7 +1,7 @@
 {
-  "name": "github-issue-sync",
+  "name": "todoist-notion-integration",
   "version": "1.0.0",
-  "description": "Sync GitHub issues with Notion.",
+  "description": "Sync Todoist tasks with Notion.",
   "main": "test.ts",
   "engines": {
     "node": "18.x"
