@@ -8,6 +8,19 @@ dotenv.config();
 //#region Todoist
 const todoistApi = new TodoistApi(process.env.TODOIST_TOKEN);
 
+const getProjects = () => {
+  return new Promise((resolve, reject) => {
+    todoistApi
+      .getProjects()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 const getCustomTasks = (filter) => {
   return new Promise((resolve, reject) => {
     todoistApi
@@ -43,13 +56,15 @@ const appendBlock = (async (taskBlock) => {
 
 async function main() {
     try {
+        const projects = await getProjects();
         const dailyTasks = await getCustomTasks("@Diario");
         dailyTasks.forEach(dailyTask => {          
           let tags = setTagOfTask(dailyTask);
           let priority = setPriorityOfTask(dailyTask);
           let content = setContentOfTask(dailyTask)
           let type = setTypeOfTask(dailyTask);
-          let priorityText = priority != '' ?
+          let project = setProject(dailyTask, projects);
+          let priorityText =
             {
               "type": "text",
               "text": {
@@ -63,31 +78,43 @@ async function main() {
                 "code": false,
                 "color": "default"
               }
-            } : null;
+            };
+          let projectText =
+            {
+              "type": "text",
+              "text": {
+                "content": project
+              },
+              "annotations": {
+                "bold": true,
+                "italic": true,
+                "strikethrough": false,
+                "underline": false,
+                "code": false,
+                "color": "default"
+              }
+            };
           let taskBlock = 
             {
               "object": "block",
               "type": type,
               [type]: {
                 "rich_text": [
+                  projectText,
                   priorityText,
                   {
                     "type": "text",
                     "text": {
                       "content": content,
                     }
-                  }
+                  },
                 ],
                 "color": tags,
               }
             }
 
-            console.log(taskBlock)
             const ass = appendBlock(taskBlock);
         });
-
-
-
 
     } catch (error) {
         console.log(error);
@@ -112,12 +139,27 @@ const setTagOfTask = (task) => {
   }
 }
 
+const setProject = (task, projects) => {
+  let projectName = '';
+  let maxLength = 12;
+  projects.forEach(project => {
+    if (task.projectId === project.id) {
+      projectName = '  (' + project.name + ')';
+      for (let i = projectName.length; i < maxLength; i++) {
+        projectName += ' ';
+      }
+      return projectName;
+    }
+  });
+  return projectName;
+};
+
 const setPriorityOfTask = (task) => {
   const priority = {
-    1 : '     ',
-    2 : '!    ',
-    3 : '!!   ',
-    4 : '!!!  ',
+    1 : '    ',
+    2 : '!   ',
+    3 : '!!  ',
+    4 : '!!! ',
   }
 
   return priority[task.priority];
@@ -129,9 +171,9 @@ const setContentOfTask = (task) => {
 
 const setTypeOfTask = (task) => {
   const typesOfTask = {
-    'Tarea' : 'bulleted_list_item',
+    'Tarea'  : 'bulleted_list_item',
     'Evento' : 'to_do',
-    'Nota' : 'toggle'
+    'Nota'   : 'toggle'
   }
 
   for (const key in typesOfTask) {
